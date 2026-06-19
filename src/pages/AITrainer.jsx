@@ -122,6 +122,10 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
   const containerRef = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // Mutable refs to resolve stale closures in MediaPipe onResults callback
+  const exerciseIdRef = useRef(selectedExercise || "bicep_curl");
+  const voiceEnabledRef = useRef(voiceEnabled);
+
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -143,6 +147,14 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
     }
   };
 
+  useEffect(() => {
+    exerciseIdRef.current = exerciseId;
+  }, [exerciseId]);
+
+  useEffect(() => {
+    voiceEnabledRef.current = voiceEnabled;
+  }, [voiceEnabled]);
+
   // Inactivity and state trackers using Refs to prevent React stale closures
   const repsRef = useRef(0);
   const incorrectRef = useRef(0);
@@ -161,7 +173,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
   }, [selectedExercise]);
 
   const speak = (msg) => {
-    if (!voiceEnabled || !window.speechSynthesis) return;
+    if (!voiceEnabledRef.current || !window.speechSynthesis) return;
     if (msg === prevFeedback.current) return;
     prevFeedback.current = msg;
     
@@ -253,6 +265,8 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
     drawSkeleton(ctx, results.poseLandmarks);
 
     const lm = results.poseLandmarks;
+    const currentExerciseId = exerciseIdRef.current;
+    const currentConfig = EXERCISES[currentExerciseId];
     
     // Choose active side
     const leftSh = lm[11], leftHip = lm[23], leftEl = lm[13], leftWr = lm[15];
@@ -278,7 +292,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
     let rangePct = 0;
 
     // --- Biomechanical Calculations ---
-    if (exerciseId === "bicep_curl") {
+    if (currentExerciseId === "bicep_curl") {
       const elbowAngle = findAngle(sh, el, wr);
       const shoulderAngle = findAngle(hp, sh, el);
       setAngleReadings([elbowAngle, shoulderAngle, 0]);
@@ -324,7 +338,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
       }
     } 
     
-    else if (exerciseId === "squat") {
+    else if (currentExerciseId === "squat") {
       const kneeAngle = findAngle(hp, kn, ak);
       const hipAngle = findAngle(sh, hp, kn);
       setAngleReadings([kneeAngle, hipAngle, 0]);
@@ -370,7 +384,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
       }
     } 
     
-    else if (exerciseId === "pushups") {
+    else if (currentExerciseId === "pushups") {
       const elbowAngle = findAngle(sh, el, wr);
       const bodyAngle = findAngle(sh, hp, ak);
       setAngleReadings([elbowAngle, bodyAngle, 0]);
@@ -416,7 +430,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
       }
     } 
     
-    else if (exerciseId === "tricep_kickback") {
+    else if (currentExerciseId === "tricep_kickback") {
       const elbowAngle = findAngle(sh, el, wr);
       const shAngle = findAngle(hp, sh, el);
       setAngleReadings([elbowAngle, shAngle, 0]);
@@ -453,7 +467,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
       }
     } 
     
-    else if (exerciseId === "dumbbell_fly") {
+    else if (currentExerciseId === "dumbbell_fly") {
       const elbowAngle = findAngle(sh, el, wr);
       const lateralAngle = findAngle(hp, sh, el);
       setAngleReadings([elbowAngle, lateralAngle, 0]);
@@ -490,7 +504,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
       }
     }
 
-    else if (exerciseId === "lunge") {
+    else if (currentExerciseId === "lunge") {
       const frontKneeAngle = findAngle(hp, kn, ak);
       const torsoAngle = findAngle(sh, hp, kn);
       setAngleReadings([frontKneeAngle, torsoAngle, 0]);
@@ -528,7 +542,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
       }
     }
 
-    else if (exerciseId === "shoulder_press") {
+    else if (currentExerciseId === "shoulder_press") {
       const elbowAngle = findAngle(sh, el, wr);
       const shoulderAngle = findAngle(hp, sh, el);
       setAngleReadings([elbowAngle, shoulderAngle, 0]);
@@ -565,7 +579,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
       }
     }
 
-    else if (exerciseId === "jumping_jacks") {
+    else if (currentExerciseId === "jumping_jacks") {
       // Jumping Jacks: Arms go from side down (~15 deg) to overhead (>130 deg)
       const leftArmAngle = findAngle(leftHip, leftSh, leftEl);
       const rightArmAngle = findAngle(rightHip, rightSh, rightEl);
@@ -619,7 +633,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
       }
     }
 
-    else if (exerciseId === "high_knees") {
+    else if (currentExerciseId === "high_knees") {
       const leftTorso = distance(leftSh, leftHip);
       const rightTorso = distance(rightSh, rightHip);
       const torsoHeight = (leftTorso + rightTorso) / 2 || 0.1;
@@ -673,7 +687,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
       }
     }
 
-    else if (exerciseId === "burpees") {
+    else if (currentExerciseId === "burpees") {
       const heightToWidthRatio = Math.abs(sh.y - ak.y) / (Math.abs(sh.x - ak.x) || 0.1);
       const bodyAngle = findAngle(sh, hp, ak);
       const handsReach = Math.round(Math.max(0, (sh.y - Math.min(leftWr.y, rightWr.y)) * 100));
@@ -729,11 +743,11 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
     const nose = lm[0];
     if (nose && leftSh && rightSh) {
       const offsetAngle = findAngle(leftSh, rightSh, nose);
-      if (config.view === "side" && offsetAngle < 44) {
+      if (currentConfig.view === "side" && offsetAngle < 44) {
         currentFeedback = "Please rotate to maintain a side view! ⚠️";
         currentFeedbackClass = "banner-warning";
         speak("Align side view");
-      } else if (config.view === "frontal" && offsetAngle > 44) {
+      } else if (currentConfig.view === "frontal" && offsetAngle > 44) {
         currentFeedback = "Please face the camera directly! Frontal view! ⚠️";
         currentFeedbackClass = "banner-warning";
         speak("Face the camera");
@@ -977,7 +991,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
               backgroundColor: "#000000",
               borderRadius: isFullscreen ? "0px" : "10px",
               overflow: "hidden",
-              height: isFullscreen ? "100%" : "240px",
+              height: isFullscreen ? "100vh" : "240px",
               display: "flex",
               alignItems: "center",
               justifyContent: "center"
@@ -995,6 +1009,97 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
               width={640}
               height={480}
             />
+
+            {/* Fullscreen Heads-Up Display (HUD) */}
+            {isFullscreen && (
+              <div style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                padding: "24px",
+                pointerEvents: "none",
+                zIndex: 9
+              }}>
+                {/* HUD Header */}
+                <div style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  width: "100%",
+                  pointerEvents: "none"
+                }}>
+                  <div style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
+                    background: "rgba(10, 15, 25, 0.8)",
+                    backdropFilter: "blur(12px)",
+                    padding: "10px 16px",
+                    borderRadius: "14px",
+                    border: "1.5px solid rgba(255, 255, 255, 0.1)",
+                    pointerEvents: "auto"
+                  }}>
+                    <span style={{ fontSize: "15px", fontWeight: "bold", color: "#FFFFFF" }}>{config.name}</span>
+                    <div style={{ display: "flex", gap: "6px", marginTop: "2px" }}>
+                      <span style={{ fontSize: "10px", color: "var(--accent-light)", background: "rgba(45, 212, 191, 0.15)", padding: "2px 6px", borderRadius: "6px", fontWeight: "bold" }}>{config.target}</span>
+                      <span style={{ fontSize: "10px", color: "var(--accent)", background: "rgba(99, 102, 241, 0.15)", padding: "2px 6px", borderRadius: "6px", fontWeight: "bold" }}>{config.view} View</span>
+                    </div>
+                  </div>
+                  
+                  {/* Floating Feedback Banner */}
+                  <div className={`banner ${feedbackClass}`} style={{
+                    margin: "0 auto",
+                    padding: "12px 24px",
+                    fontSize: "16px",
+                    borderRadius: "14px",
+                    boxShadow: "0 12px 30px rgba(0, 0, 0, 0.65)",
+                    pointerEvents: "auto",
+                    textAlign: "center",
+                    maxWidth: "400px",
+                    backdropFilter: "blur(8px)"
+                  }}>
+                    {feedback}
+                  </div>
+
+                  {/* Spacer to push minimize button */}
+                  <div style={{ width: "90px" }} />
+                </div>
+
+                {/* HUD Footer (Stats HUD) */}
+                <div style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  width: "100%",
+                  pointerEvents: "auto",
+                  background: "rgba(10, 15, 25, 0.82)",
+                  backdropFilter: "blur(16px)",
+                  padding: "14px 28px",
+                  borderRadius: "20px",
+                  border: "1.5px solid rgba(255, 255, 255, 0.12)",
+                  maxWidth: "500px",
+                  margin: "0 auto",
+                  boxShadow: "0 20px 45px rgba(0,0,0,0.6)"
+                }}>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: "90px" }}>
+                    <span style={{ fontSize: "10px", color: "var(--muted)", fontWeight: "bold", letterSpacing: "1px" }}>REPS</span>
+                    <span style={{ fontSize: "36px", fontWeight: "bold", color: "var(--accent)", marginTop: "2px" }}>{reps}</span>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: "90px" }}>
+                    <span style={{ fontSize: "10px", color: "var(--muted)", fontWeight: "bold", letterSpacing: "1px" }}>POSTURE</span>
+                    <span style={{ fontSize: "36px", fontWeight: "bold", color: "var(--accent-light)", marginTop: "2px" }}>{postureScore}%</span>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: "90px" }}>
+                    <span style={{ fontSize: "10px", color: "var(--muted)", fontWeight: "bold", letterSpacing: "1px" }}>IMPROPER</span>
+                    <span style={{ fontSize: "36px", fontWeight: "bold", color: "var(--danger)", marginTop: "2px" }}>{incorrect}</span>
+                  </div>
+                </div>
+              </div>
+            )}
             
             {/* Fullscreen Button Overlay */}
             {active && (
