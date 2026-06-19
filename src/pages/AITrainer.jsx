@@ -131,6 +131,17 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
   };
 
   useEffect(() => {
+    if (isFullscreen) {
+      document.body.classList.add("fullscreen-active");
+    } else {
+      document.body.classList.remove("fullscreen-active");
+    }
+    return () => {
+      document.body.classList.remove("fullscreen-active");
+    };
+  }, [isFullscreen]);
+
+  useEffect(() => {
     exerciseIdRef.current = exerciseId;
   }, [exerciseId]);
 
@@ -935,8 +946,43 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
           margin: 0 !important;
           background-color: #000000 !important;
         }
+        body.fullscreen-active aside {
+          display: none !important;
+        }
+        body.fullscreen-active .trainer-header {
+          display: none !important;
+        }
+        body.fullscreen-active .live-panel {
+          display: none !important;
+        }
+        body.fullscreen-active .camera-card {
+          border: none !important;
+          background: none !important;
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
+          box-shadow: none !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          transform: none !important;
+          transition: none !important;
+          position: static !important;
+          z-index: auto !important;
+        }
+        body.fullscreen-active .grid-2 {
+          display: block !important;
+          gap: 0 !important;
+        }
+        body.fullscreen-active .main-content {
+          padding: 0 !important;
+          margin: 0 !important;
+          max-width: 100vw !important;
+          max-height: 100vh !important;
+          overflow: hidden !important;
+          width: 100vw !important;
+          height: 100vh !important;
+        }
       `}</style>
-      <div style={{ marginBottom: "1.25rem" }}>
+      <div className="trainer-header" style={{ marginBottom: "1.25rem" }}>
         <h2 style={{ fontSize: "1.75rem" }}>⚡ AI Posture Trainer</h2>
         <p style={{ color: "var(--muted)", marginTop: "2px", fontSize: "13px" }}>
           Real-time biomechanics analysis. Select "Demo Video" to test the AI on our sample workout.
@@ -945,7 +991,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
 
       <div className="grid-2" style={{ gap: "1rem" }}>
         {/* Camera Feed Card */}
-        <div className="card" style={{ display: "flex", flexDirection: "column", padding: "1rem" }}>
+        <div className="camera-card card" style={{ display: "flex", flexDirection: "column", padding: "1rem" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "6px" }}>
             <h3 style={{ fontSize: "14px" }}>⚡ Activity Frame</h3>
             <div style={{ display: "flex", gap: "6px" }}>
@@ -1002,7 +1048,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
             />
             <canvas
               ref={canvasRef}
-              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", transform: sourceType === "webcam" ? "scaleX(-1)" : "none" }}
+              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", objectFit: "contain", transform: sourceType === "webcam" ? "scaleX(-1)" : "none" }}
               width={640}
               height={480}
             />
@@ -1078,8 +1124,9 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
                   padding: "14px 28px",
                   borderRadius: "20px",
                   border: "1.5px solid rgba(255, 255, 255, 0.12)",
-                  maxWidth: "500px",
-                  margin: "0 auto",
+                  maxWidth: "360px",
+                  margin: "0",
+                  alignSelf: "flex-start",
                   boxShadow: "0 20px 45px rgba(0,0,0,0.6)"
                 }}>
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: "90px" }}>
@@ -1163,7 +1210,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
         </div>
 
         {/* Live Performance Panel */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+        <div className="live-panel" style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
           {/* Target Muscle / Exercise Info */}
           <div className="card" style={{ padding: "1rem" }}>
             <h3 style={{ fontSize: "15px", color: "var(--accent)" }}>{config.name}</h3>
