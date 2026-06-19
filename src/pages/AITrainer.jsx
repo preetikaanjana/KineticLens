@@ -118,7 +118,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
   const startTime = useRef(null);
   const activeRef = useRef(false);
 
-  // Fullscreen hooks
+  // Simulated Fullscreen State
   const containerRef = useRef(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -126,25 +126,8 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
   const exerciseIdRef = useRef(selectedExercise || "bicep_curl");
   const voiceEnabledRef = useRef(voiceEnabled);
 
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, []);
-
   const toggleFullscreen = () => {
-    if (!containerRef.current) return;
-    if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen().catch((err) => {
-        console.error("Error entering fullscreen: ", err);
-      });
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
-    }
+    setIsFullscreen(prev => !prev);
   };
 
   useEffect(() => {
@@ -940,6 +923,19 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
 
   return (
     <div>
+      <style>{`
+        .simulated-fullscreen {
+          position: fixed !important;
+          top: 0 !important;
+          left: 0 !important;
+          width: 100vw !important;
+          height: 100vh !important;
+          z-index: 99999 !important;
+          border-radius: 0 !important;
+          margin: 0 !important;
+          background-color: #000000 !important;
+        }
+      `}</style>
       <div style={{ marginBottom: "1.25rem" }}>
         <h2 style={{ fontSize: "1.75rem" }}>⚡ AI Posture Trainer</h2>
         <p style={{ color: "var(--muted)", marginTop: "2px", fontSize: "13px" }}>
@@ -985,6 +981,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
 
           <div
             ref={containerRef}
+            className={isFullscreen ? "simulated-fullscreen" : ""}
             style={{
               position: "relative",
               width: "100%",
