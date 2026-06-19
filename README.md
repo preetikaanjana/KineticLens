@@ -1,8 +1,5 @@
 # KineticLens
-The project aims to revolutionize fitness guidance by leveraging cutting-edge technologies such as computer vision and machine learning. Through a multipage web application built with **Streamlit**, users receive real-time posture correction feedback during workouts. The integration of **OpenCV** and **Mediapipe** enables accurate posture detection and correction, ensuring optimal exercise form. Additionally, the application utilizes the **LLM Large Language Model** to provide personalized weekly exercise plans tailored to individual users' fitness goals and progress. With efficient **SQL** database management, the project ensures seamless data storage and retrieval, contributing to a holistic and personalized fitness experience.
-
-:arrow_right: *For deeper explanation and implementation notes, see the included project report PDF in this repository.*
-
+The project aims to revolutionize fitness guidance by leveraging cutting-edge technologies such as computer vision and machine learning. Through an interactive web application built with **React** and **Vite**, users receive real-time posture correction feedback during workouts. The integration of **MediaPipe Pose** enables accurate client-side posture detection and correction directly in the browser, ensuring optimal exercise form. Additionally, the application utilizes an **LLM-powered** planner to provide personalized weekly exercise plans tailored to individual users' fitness goals and progress. With browser-based **LocalStorage** database adapter, the project ensures seamless data storage and retrieval locally, contributing to a private and personalized fitness experience.
 
 ## Objectives and Goals
 - Detect and correct improper posture in real-time.
@@ -11,10 +8,10 @@ The project aims to revolutionize fitness guidance by leveraging cutting-edge te
 - Utilize Large Language Models (LLM) to generate personalized weekly exercise plans based on users' fitness levels, preferences, and progress.
 
 ## Tools & Technologies
-- **Programming Languages**: Python (TensorFlow, OpenCV, MediaPipe, PyTorch)
-- **Machine Learning Models**: Pose estimation, deep learning-based posture correction, recommendation systems
-- **Data Sources**: Fitness datasets, real-time user feedback
-- **User Interface**: Web-based and mobile application integration
+- **Frontend Stack**: React 19, Vite, Javascript (ES6+), HTML5, CSS3 (Pastel Palette System)
+- **Machine Learning & Models**: MediaPipe Pose estimation (client-side via CDN), Web Speech API for voice alerts
+- **Storage**: HTML5 LocalStorage for local-only account profile and session caching
+- **Data Visualization**: ChartJS & React-Chartjs-2 for body progress metrics
 
 ## Methodology
 Our AI-powered fitness application follows a structured approach to posture detection, personalized workout recommendations, and real-time feedback. The methodology consists of three core components:
@@ -121,11 +118,15 @@ Detailed explaination can be found in report.
    ```
 2. **Install dependencies:**
    ```sh
-   pip install -r requirements.txt
+   npm install
    ```
-3. **Run the application:**
+3. **Run the application (Development Server):**
    ```sh
-   streamlit run <Homepage.py>
+   npm run dev
+   ```
+4. **Build the production bundle:**
+   ```sh
+   npm run build
    ```
 4. **Follow the on-screen instructions to analyze your posture and get personalized workout recommendations.**
 
