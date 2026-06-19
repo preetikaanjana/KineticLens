@@ -118,6 +118,31 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
   const startTime = useRef(null);
   const activeRef = useRef(false);
 
+  // Fullscreen hooks
+  const containerRef = useRef(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!containerRef.current) return;
+    if (!document.fullscreenElement) {
+      containerRef.current.requestFullscreen().catch((err) => {
+        console.error("Error entering fullscreen: ", err);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
+
   // Inactivity and state trackers using Refs to prevent React stale closures
   const repsRef = useRef(0);
   const incorrectRef = useRef(0);
@@ -944,7 +969,20 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
             </div>
           </div>
 
-          <div style={{ position: "relative", width: "100%", backgroundColor: "#000000", borderRadius: "10px", overflow: "hidden", height: "240px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div
+            ref={containerRef}
+            style={{
+              position: "relative",
+              width: "100%",
+              backgroundColor: "#000000",
+              borderRadius: isFullscreen ? "0px" : "10px",
+              overflow: "hidden",
+              height: isFullscreen ? "100%" : "240px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            }}
+          >
             <video
               ref={videoRef}
               style={{ width: "100%", height: "100%", objectFit: "contain", transform: sourceType === "webcam" ? "scaleX(-1)" : "none", display: active ? "block" : "none" }}
@@ -957,6 +995,37 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
               width={640}
               height={480}
             />
+            
+            {/* Fullscreen Button Overlay */}
+            {active && (
+              <button
+                type="button"
+                onClick={toggleFullscreen}
+                style={{
+                  position: "absolute",
+                  top: "12px",
+                  right: "12px",
+                  background: "rgba(10, 15, 25, 0.7)",
+                  backdropFilter: "blur(4px)",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  color: "#FFFFFF",
+                  padding: "5px 10px",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  zIndex: 10,
+                  transition: "all 0.2s ease"
+                }}
+                title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+              >
+                {isFullscreen ? "🗙 Minimize" : "⛶ Fullscreen"}
+              </button>
+            )}
+
             {!active && (
               <div style={{ position: "absolute", textAlign: "center", padding: "1rem" }}>
                 <span style={{ fontSize: "2rem" }}>📹</span>
