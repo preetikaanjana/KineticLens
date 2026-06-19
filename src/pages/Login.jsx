@@ -525,15 +525,24 @@ export default function Login({ onLogin }) {
 
                 <div style={{ gridColumn: "span 1" }}>
                   <label style={styles.inputLabel}>Password</label>
-                  <input
-                    type="password"
-                    className="input"
-                    required
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    style={styles.gridInputField}
-                  />
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      className="input"
+                      required
+                      placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      style={{ ...styles.gridInputField, paddingRight: "35px" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      style={{ ...styles.showPassBtn, right: "6px" }}
+                    >
+                      {showPassword ? "🙈" : "👁️"}
+                    </button>
+                  </div>
                 </div>
 
                 <div style={{ gridColumn: "span 1" }}>

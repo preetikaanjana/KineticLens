@@ -218,7 +218,6 @@ export default function Home({ setActiveTab, setSelectedExercise, theme, user })
                 style={{ 
                   width: "100%", 
                   marginTop: "1.25rem",
-                  background: "linear-gradient(135deg, var(--accent), var(--accent-light))",
                   color: "#FFFFFF"
                 }}
                 onClick={() => handleStartWorkout(ex.id)}
