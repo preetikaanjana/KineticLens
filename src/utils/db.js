@@ -1,5 +1,5 @@
 /**
- * LocalStorage database adapter for Lemonade AI Fitness App.
+ * LocalStorage database adapter for KineticLens AI Fitness App.
  * Persists sessions, calendar entries, body metrics, and achievements.
  */
 

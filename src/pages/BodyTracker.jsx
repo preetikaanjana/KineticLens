@@ -22,7 +22,7 @@ ChartJS.register(
   Legend
 );
 
-export default function BodyTracker() {
+export default function BodyTracker({ theme }) {
   const [entries, setEntries] = useState([]);
   
   // Form input fields
@@ -115,23 +115,28 @@ export default function BodyTracker() {
     ]
   };
 
+  const isLight = theme === "light";
+  const gridColor = isLight ? "rgba(0, 0, 0, 0.08)" : "rgba(255, 255, 255, 0.05)";
+  const tickColor = isLight ? "#64748B" : "#9CA3AF";
+  const legendColor = isLight ? "#1E293B" : "#FFFFFF";
+
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        labels: { color: "#FFFFFF", font: { family: "Outfit" } }
+        labels: { color: legendColor, font: { family: "Outfit" } }
       },
       tooltip: { padding: 10 }
     },
     scales: {
       y: {
-        grid: { color: "rgba(255, 255, 255, 0.05)" },
-        ticks: { color: "#9CA3AF" }
+        grid: { color: gridColor },
+        ticks: { color: tickColor }
       },
       x: {
-        grid: { color: "rgba(255, 255, 255, 0.05)" },
-        ticks: { color: "#9CA3AF" }
+        grid: { color: gridColor },
+        ticks: { color: tickColor }
       }
     }
   };

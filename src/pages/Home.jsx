@@ -31,10 +31,13 @@ const EXERCISES_LIST = [
   { id: "dumbbell_fly", name: "Dumbbell Fly", muscle: "Chest", diff: "Easy", path: "trainer" },
   { id: "tricep_kickback", name: "Tricep Kickback", muscle: "Arms", diff: "Easy", path: "trainer" },
   { id: "lunge", name: "Lunges", muscle: "Legs", diff: "Medium", path: "trainer" },
-  { id: "shoulder_press", name: "Shoulder Press", muscle: "Shoulders", diff: "Medium", path: "trainer" }
+  { id: "shoulder_press", name: "Shoulder Press", muscle: "Shoulders", diff: "Medium", path: "trainer" },
+  { id: "jumping_jacks", name: "Jumping Jacks", muscle: "Cardio", diff: "Easy", path: "trainer" },
+  { id: "high_knees", name: "High Knees", muscle: "Cardio", diff: "Hard", path: "trainer" },
+  { id: "burpees", name: "Burpees", muscle: "Cardio", diff: "Hard", path: "trainer" }
 ];
 
-export default function Home({ setActiveTab, setSelectedExercise }) {
+export default function Home({ setActiveTab, setSelectedExercise, theme, user }) {
   const [stats, setStats] = useState(getDashboardStats());
 
   useEffect(() => {
@@ -46,6 +49,10 @@ export default function Home({ setActiveTab, setSelectedExercise }) {
     setSelectedExercise(id);
     setActiveTab("trainer");
   };
+
+  const isLight = theme === "light";
+  const gridColor = isLight ? "rgba(0, 0, 0, 0.08)" : "rgba(255, 255, 255, 0.05)";
+  const tickColor = isLight ? "#64748B" : "#9CA3AF";
 
   // Plotly-equivalent Line chart settings in Chart.js
   const lineChartData = {
@@ -75,14 +82,14 @@ export default function Home({ setActiveTab, setSelectedExercise }) {
     },
     scales: {
       y: {
-        grid: { color: "rgba(255, 255, 255, 0.05)" },
-        ticks: { color: "#9CA3AF" },
+        grid: { color: gridColor },
+        ticks: { color: tickColor },
         min: 0,
         max: 100
       },
       x: {
-        grid: { color: "rgba(255, 255, 255, 0.05)" },
-        ticks: { color: "#9CA3AF" }
+        grid: { color: gridColor },
+        ticks: { color: tickColor }
       }
     }
   };
@@ -108,12 +115,12 @@ export default function Home({ setActiveTab, setSelectedExercise }) {
     plugins: { legend: { display: false } },
     scales: {
       y: {
-        grid: { color: "rgba(255, 255, 255, 0.05)" },
-        ticks: { color: "#9CA3AF", stepSize: 1 }
+        grid: { color: gridColor },
+        ticks: { color: tickColor, stepSize: 1 }
       },
       x: {
-        grid: { color: "rgba(255, 255, 255, 0.05)" },
-        ticks: { color: "#9CA3AF" }
+        grid: { color: gridColor },
+        ticks: { color: tickColor }
       }
     }
   };
@@ -139,7 +146,7 @@ export default function Home({ setActiveTab, setSelectedExercise }) {
           ⚡ {todayStr.toUpperCase()}
         </p>
         <h1 style={{ fontSize: "2.25rem", marginTop: "4px" }}>
-          Welcome back, <span style={{ color: "var(--accent)" }}>Athlete</span> ⚡
+          Welcome back, <span style={{ color: "var(--accent)" }}>{user?.name || "Athlete"}</span> ⚡
         </h1>
         <p style={{ color: "var(--muted)", marginTop: "6px", fontSize: "14px" }}>
           Ready to crush your workout today? Consistency is the key to progress!
@@ -190,15 +197,30 @@ export default function Home({ setActiveTab, setSelectedExercise }) {
         </h2>
         <div className="grid-3">
           {EXERCISES_LIST.map((ex) => (
-            <div key={ex.id} className="card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <div 
+              key={ex.id} 
+              className="card" 
+              style={{ 
+                display: "flex", 
+                flexDirection: "column", 
+                justifyContent: "space-between"
+              }}
+            >
               <div>
-                <h4 style={{ fontSize: "16px", color: "#FFFFFF" }}>⚡ {ex.name}</h4>
-                <p style={{ fontSize: "12px", color: "var(--accent-light)", margin: "4px 0 10px", fontWeight: 600 }}>Targets: {ex.muscle}</p>
-                <span className={`badge badge-${ex.diff.toLowerCase()}`}>{ex.diff}</span>
+                <h4 style={{ fontSize: "16px", color: "var(--text)" }}>⚡ {ex.name}</h4>
+                <div style={{ display: "flex", gap: "6px", margin: "6px 0 10px", alignItems: "center" }}>
+                  <span className="badge-muscle">{ex.muscle}</span>
+                  <span className={`badge badge-${ex.diff.toLowerCase()}`}>{ex.diff}</span>
+                </div>
               </div>
               <button
-                className="btn btn-secondary"
-                style={{ width: "100%", marginTop: "1rem" }}
+                className="btn btn-primary"
+                style={{ 
+                  width: "100%", 
+                  marginTop: "1.25rem",
+                  background: "linear-gradient(135deg, var(--accent), var(--accent-light))",
+                  color: "#FFFFFF"
+                }}
                 onClick={() => handleStartWorkout(ex.id)}
               >
                 ⚡ Train Now

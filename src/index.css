@@ -1,19 +1,51 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg: #0A0E1A;
-  --sidebar: #111625;
-  --card: #161F30;
-  --accent: #6366F1;
-  --accent-light: #06B6D4;
-  --text: #F9FAFB;
-  --muted: #9CA3AF;
-  --success: #10B981;
-  --warning: #F59E0B;
-  --danger: #EF4444;
-  --border: rgba(99, 102, 241, 0.15);
-  --border-input: rgba(99, 102, 241, 0.28);
-  --shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+  /* Default: Dark Pastel Theme */
+  --bg: #070B14;
+  --bg-glow-1: rgba(99, 102, 241, 0.18); /* Neon indigo */
+  --bg-glow-2: rgba(45, 212, 191, 0.14); /* Neon teal */
+  --bg-glow-3: rgba(236, 72, 153, 0.12); /* Neon magenta/pink */
+  --sidebar: #0C1220;
+  --card: rgba(18, 26, 47, 0.7);
+  --accent: #818CF8; /* Soft pastel indigo */
+  --accent-light: #2DD4BF; /* Muted cyan/teal */
+  --text: #F8FAFC;
+  --muted: #94A3B8;
+  --success: #34D399; /* Soft green */
+  --warning: #FBBF24; /* Soft yellow */
+  --danger: #F87171; /* Soft coral red */
+  --border: rgba(129, 140, 248, 0.15);
+  --border-input: rgba(129, 140, 248, 0.25);
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  --shadow-hover: 0 20px 45px rgba(99, 102, 241, 0.14);
+  --input-bg: #0F1626; /* Dark mode input background */
+  --btn-secondary-bg: #121A2E;
+  --btn-secondary-text: #F8FAFC;
+}
+
+[data-theme='light'] {
+  /* Light Pastel Hybrid Theme */
+  --bg: #EAEFFC; /* Rich cool pastel lavender-blue */
+  --bg-glow-1: rgba(139, 92, 246, 0.25); /* Vibrant pastel violet */
+  --bg-glow-2: rgba(20, 184, 166, 0.22); /* Vibrant pastel teal */
+  --bg-glow-3: rgba(251, 146, 60, 0.18); /* Vibrant pastel peach-orange */
+  --sidebar: #101626; /* Grounded dark sidebar for high-contrast layout */
+  --card: rgba(255, 255, 255, 0.8);
+  --accent: #4F46E5; /* Deeper indigo for better readability in light mode */
+  --accent-light: #0D9488;
+  --text: #0F172A; /* Dark charcoal text */
+  --muted: #475569; /* Darker muted text */
+  --success: #059669;
+  --warning: #D97706;
+  --danger: #DC2626;
+  --border: rgba(99, 102, 241, 0.08);
+  --border-input: rgba(99, 102, 241, 0.15);
+  --shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
+  --shadow-hover: 0 20px 45px rgba(79, 70, 229, 0.08);
+  --input-bg: #F1F5F9; /* Light mode input background */
+  --btn-secondary-bg: #E2E8F0;
+  --btn-secondary-text: #0F172A;
 }
 
 * {
@@ -24,15 +56,21 @@
 
 body {
   background-color: var(--bg);
+  background-image: 
+    radial-gradient(circle at 10% 20%, var(--bg-glow-1) 0%, transparent 45%),
+    radial-gradient(circle at 90% 80%, var(--bg-glow-2) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, var(--bg-glow-3) 0%, transparent 50%);
+  background-attachment: fixed;
   color: var(--text);
   font-family: 'Inter', sans-serif;
   overflow-x: hidden;
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Outfit', sans-serif;
   font-weight: 700;
-  color: #FFFFFF;
+  color: var(--text);
 }
 
 /* Scrollbars */
@@ -44,50 +82,53 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: #1C243A;
+  background: var(--border-input);
   border-radius: 8px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2B3758;
+  background: var(--accent);
 }
 
 /* Layout Container */
 .app-container {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .main-content {
   flex: 1;
   padding: 2.5rem;
   background-color: var(--bg);
-  min-height: 100vh;
+  height: 100vh;
   overflow-y: auto;
+  transition: background-color 0.3s ease;
 }
 
 /* Cards */
 .card {
-  background: var(--card);
-  border: 1.5px solid var(--border);
-  border-radius: 18px;
+  background: var(--card) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1.5px solid var(--border) !important;
+  border-radius: 22px;
   padding: 1.5rem;
   margin-bottom: 1.25rem;
-  box-shadow: var(--shadow);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--shadow) !important;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(99, 102, 241, 0.35);
-  box-shadow: 0 12px 40px rgba(99, 102, 241, 0.12);
+  transform: translateY(-5px) scale(1.008);
+  border-color: var(--accent) !important;
+  box-shadow: var(--shadow-hover) !important;
 }
 
-/* Form Controls */
 .input, .select, .textarea {
   width: 100%;
-  background-color: var(--sidebar);
-  border: 1.5px solid #283556;
-  color: var(--text);
+  background-color: var(--input-bg) !important;
+  border: 1.5px solid var(--border-input) !important;
+  color: var(--text) !important;
   border-radius: 12px;
   padding: 10px 14px;
   font-size: 14px;
@@ -99,7 +140,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .input:focus, .select:focus, .textarea:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
 }
 
 label {
@@ -137,22 +178,23 @@ label {
 .btn-primary {
   background: linear-gradient(135deg, var(--accent), #4F46E5);
   color: #FFFFFF;
-  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+  box-shadow: 0 4px 15px rgba(129, 140, 248, 0.35);
 }
 
 .btn-primary:hover {
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+  box-shadow: 0 6px 20px rgba(129, 140, 248, 0.45);
 }
 
 .btn-secondary {
-  background-color: #1F2937;
-  color: #FFFFFF;
-  border: 1.5px solid #374151;
+  background-color: var(--btn-secondary-bg) !important;
+  color: var(--btn-secondary-text) !important;
+  border: 1.5px solid var(--border-input) !important;
 }
 
 .btn-secondary:hover {
-  background-color: #374151;
-  border-color: var(--accent);
+  background-color: var(--border-input) !important;
+  border-color: var(--accent) !important;
+  color: var(--btn-secondary-text) !important;
 }
 
 .btn-danger {
@@ -266,4 +308,23 @@ label {
   background: rgba(239, 68, 68, 0.12);
   border: 1.5px solid var(--danger);
   color: var(--danger);
+}
+
+/* Select option styles to prevent browser rendering bugs */
+.select option {
+  background-color: var(--card) !important;
+  color: var(--text) !important;
+}
+
+/* Explicit placeholder styles */
+.input::placeholder, .textarea::placeholder {
+  color: var(--muted) !important;
+  opacity: 0.7;
+}
+
+/* 3D floatCard Keyframe */
+@keyframes floatCard {
+  0% { transform: perspective(800px) rotateY(12deg) rotateX(8deg) translateY(0px); }
+  50% { transform: perspective(800px) rotateY(15deg) rotateX(6deg) translateY(-10px); }
+  100% { transform: perspective(800px) rotateY(12deg) rotateX(8deg) translateY(0px); }
 }

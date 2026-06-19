@@ -9,7 +9,7 @@ const EXERCISES = {
     view: "side",
     tip: "Keep your elbows pinned to your torso. Only move your forearms.",
     angles: ["Elbow Angle", "Shoulder Angle", "Hip Offset"],
-    videoUrl: "/output_sample.mp4" // Locally copied sample video
+    videoUrl: "/output_sample.mp4"
   },
   squat: {
     name: "Squats",
@@ -64,6 +64,33 @@ const EXERCISES = {
     tip: "Press dumbbells straight overhead. Keep your core engaged and don't arch your back.",
     angles: ["Elbow Extension", "Shoulder Extension", "Symmetry"],
     videoUrl: "/output_sample.mp4"
+  },
+  jumping_jacks: {
+    name: "Jumping Jacks (Cardio)",
+    target: "Cardio & Full Body",
+    diff: "Easy",
+    view: "frontal",
+    tip: "Jump wide while clapping hands overhead, then return to a standing position.",
+    angles: ["Left Arm Angle", "Right Arm Angle", "Leg Separation"],
+    videoUrl: "/output_sample.mp4"
+  },
+  high_knees: {
+    name: "High Knees (Cardio)",
+    target: "Cardio & Legs",
+    diff: "Hard",
+    view: "side",
+    tip: "Stand tall, drive one knee up towards your chest (above hip level), swap and repeat rapidly.",
+    angles: ["Left Knee Lift", "Right Knee Lift", "Torso Angle"],
+    videoUrl: "/output_sample.mp4"
+  },
+  burpees: {
+    name: "Burpees (Cardio)",
+    target: "Full Body & Cardio",
+    diff: "Hard",
+    view: "side",
+    tip: "Drop into a squat, kick feet back to a push-up position, return to squat, and jump high with arms up.",
+    angles: ["Height/Width Ratio", "Body Straightness", "Hands Reach"],
+    videoUrl: "/output_sample.mp4"
   }
 };
 
@@ -71,7 +98,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
   const [exerciseId, setExerciseId] = useState(selectedExercise || "bicep_curl");
   const config = EXERCISES[exerciseId];
 
-  const [sourceType, setSourceType] = useState("demo"); // Default to demo video mode as requested
+  const [sourceType, setSourceType] = useState("demo"); // Default to demo video mode
   const [active, setActive] = useState(false);
   const [loading, setLoading] = useState(false);
   const [reps, setReps] = useState(0);
@@ -91,7 +118,9 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
   const startTime = useRef(null);
   const activeRef = useRef(false);
 
-  // Inactivity and state trackers
+  // Inactivity and state trackers using Refs to prevent React stale closures
+  const repsRef = useRef(0);
+  const incorrectRef = useRef(0);
   const repState = useRef("s1");
   const stateSeq = useRef([]);
   const incorrectPosture = useRef(false);
@@ -201,8 +230,8 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
     const lm = results.poseLandmarks;
     
     // Choose active side
-    const leftSh = lm[11], leftHip = lm[23];
-    const rightSh = lm[12], rightHip = lm[24];
+    const leftSh = lm[11], leftHip = lm[23], leftEl = lm[13], leftWr = lm[15];
+    const rightSh = lm[12], rightHip = lm[24], rightEl = lm[14], rightWr = lm[16];
     const side = (leftSh.z < rightSh.z) ? "left" : "right";
 
     const sh = side === "left" ? lm[11] : lm[12];
@@ -245,14 +274,17 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
       } else if (state === "s1") {
         if (stateSeq.current.includes("s2") && stateSeq.current.includes("s3")) {
           if (!incorrectPosture.current) {
-            setReps(r => r + 1);
-            speak(`${reps + 1}`);
+            repsRef.current = repsRef.current + 1;
+            setReps(repsRef.current);
+            speak(`${repsRef.current}`);
           } else {
-            setIncorrect(i => i + 1);
+            incorrectRef.current = incorrectRef.current + 1;
+            setIncorrect(incorrectRef.current);
             speak("Incorrect form");
           }
         } else if (stateSeq.current.includes("s2")) {
-          setIncorrect(i => i + 1);
+          incorrectRef.current = incorrectRef.current + 1;
+          setIncorrect(incorrectRef.current);
           speak("Lift higher");
         }
         stateSeq.current = [];
@@ -288,14 +320,17 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
       } else if (state === "s1") {
         if (stateSeq.current.includes("s2") && stateSeq.current.includes("s3")) {
           if (!incorrectPosture.current) {
-            setReps(r => r + 1);
-            speak(`${reps + 1}`);
+            repsRef.current = repsRef.current + 1;
+            setReps(repsRef.current);
+            speak(`${repsRef.current}`);
           } else {
-            setIncorrect(i => i + 1);
+            incorrectRef.current = incorrectRef.current + 1;
+            setIncorrect(incorrectRef.current);
             speak("Check spine alignment");
           }
         } else if (stateSeq.current.includes("s2")) {
-          setIncorrect(i => i + 1);
+          incorrectRef.current = incorrectRef.current + 1;
+          setIncorrect(incorrectRef.current);
           speak("Lower hips more");
         }
         stateSeq.current = [];
@@ -331,14 +366,17 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
       } else if (state === "s1") {
         if (stateSeq.current.includes("s2") && stateSeq.current.includes("s3")) {
           if (!incorrectPosture.current) {
-            setReps(r => r + 1);
-            speak(`${reps + 1}`);
+            repsRef.current = repsRef.current + 1;
+            setReps(repsRef.current);
+            speak(`${repsRef.current}`);
           } else {
-            setIncorrect(i => i + 1);
+            incorrectRef.current = incorrectRef.current + 1;
+            setIncorrect(incorrectRef.current);
             speak("Body sag");
           }
         } else if (stateSeq.current.includes("s2")) {
-          setIncorrect(i => i + 1);
+          incorrectRef.current = incorrectRef.current + 1;
+          setIncorrect(incorrectRef.current);
           speak("Lower chest further");
         }
         stateSeq.current = [];
@@ -374,8 +412,9 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
       } else if (state === "s1") {
         if (stateSeq.current.includes("s2") && stateSeq.current.includes("s3")) {
           if (!incorrectPosture.current) {
-            setReps(r => r + 1);
-            speak(`${reps + 1}`);
+            repsRef.current = repsRef.current + 1;
+            setReps(repsRef.current);
+            speak(`${repsRef.current}`);
           }
         }
         stateSeq.current = [];
@@ -410,8 +449,9 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
       } else if (state === "s1") {
         if (stateSeq.current.includes("s2") && stateSeq.current.includes("s3")) {
           if (!incorrectPosture.current) {
-            setReps(r => r + 1);
-            speak(`${reps + 1}`);
+            repsRef.current = repsRef.current + 1;
+            setReps(repsRef.current);
+            speak(`${repsRef.current}`);
           }
         }
         stateSeq.current = [];
@@ -446,8 +486,9 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
       } else if (state === "s1") {
         if (stateSeq.current.includes("s2") && stateSeq.current.includes("s3")) {
           if (!incorrectPosture.current) {
-            setReps(r => r + 1);
-            speak(`${reps + 1}`);
+            repsRef.current = repsRef.current + 1;
+            setReps(repsRef.current);
+            speak(`${repsRef.current}`);
           }
         }
         stateSeq.current = [];
@@ -483,8 +524,9 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
       } else if (state === "s1") {
         if (stateSeq.current.includes("s2") && stateSeq.current.includes("s3")) {
           if (!incorrectPosture.current) {
-            setReps(r => r + 1);
-            speak(`${reps + 1}`);
+            repsRef.current = repsRef.current + 1;
+            setReps(repsRef.current);
+            speak(`${repsRef.current}`);
           }
         }
         stateSeq.current = [];
@@ -498,14 +540,178 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
       }
     }
 
-    // --- Side-View Alignment Warning (README feature) ---
+    else if (exerciseId === "jumping_jacks") {
+      // Jumping Jacks: Arms go from side down (~15 deg) to overhead (>130 deg)
+      const leftArmAngle = findAngle(leftHip, leftSh, leftEl);
+      const rightArmAngle = findAngle(rightHip, rightSh, rightEl);
+      
+      // Leg separation distance normalized by shoulder width (completely distance independent)
+      const legDist = distance(lm[27], lm[28]);
+      const shWidth = distance(leftSh, rightSh) || 0.1;
+      const legSeparationRatio = legDist / shWidth;
+      
+      // Leg Separation proxy angle (40 standing to 130 wide jump)
+      const legSeparationAngle = Math.round(Math.min(140, Math.max(40, legSeparationRatio * 60)));
+      setAngleReadings([leftArmAngle, rightArmAngle, legSeparationAngle]);
+      activeAngle = leftArmAngle;
+
+      // Arm range: 35 (0%) up to 125 (100%)
+      rangePct = Math.max(0, Math.min(100, ((leftArmAngle - 35) / (125 - 35)) * 100));
+
+      let state = "s1";
+      if (leftArmAngle < 45 && legSeparationRatio < 0.95) {
+        state = "s1";
+      } else if (leftArmAngle >= 45 && leftArmAngle <= 110) {
+        state = "s2";
+      } else if (leftArmAngle > 110 && legSeparationRatio > 1.35) {
+        state = "s3";
+      }
+
+      if (state === "s2") {
+        if (!stateSeq.current.includes("s2")) stateSeq.current.push("s2");
+      } else if (state === "s3") {
+        if (!stateSeq.current.includes("s3") && stateSeq.current.includes("s2")) stateSeq.current.push("s3");
+      } else if (state === "s1") {
+        if (stateSeq.current.includes("s2") && stateSeq.current.includes("s3")) {
+          if (!incorrectPosture.current) {
+            repsRef.current = repsRef.current + 1;
+            setReps(repsRef.current);
+            speak(`${repsRef.current}`);
+          } else {
+            incorrectRef.current = incorrectRef.current + 1;
+            setIncorrect(incorrectRef.current);
+            speak("Incomplete jack");
+          }
+        }
+        stateSeq.current = [];
+        incorrectPosture.current = false;
+      }
+
+      if (Math.abs(leftArmAngle - rightArmAngle) > 30) {
+        incorrectPosture.current = true;
+        currentFeedback = "Raise both arms symmetrically overhead! ⚠️";
+        currentFeedbackClass = "banner-warning";
+      }
+    }
+
+    else if (exerciseId === "high_knees") {
+      const leftTorso = distance(leftSh, leftHip);
+      const rightTorso = distance(rightSh, rightHip);
+      const torsoHeight = (leftTorso + rightTorso) / 2 || 0.1;
+
+      const leftLift = (leftHip.y - lm[25].y) / torsoHeight;
+      const rightLift = (rightHip.y - lm[26].y) / torsoHeight;
+
+      const leftLiftVal = Math.round(Math.max(0, (leftLift + 0.2) * 150));
+      const rightLiftVal = Math.round(Math.max(0, (rightLift + 0.2) * 150));
+
+      const torsoAngle = findAngle(sh, hp, { x: hp.x, y: hp.y + 0.5 });
+      setAngleReadings([leftLiftVal, rightLiftVal, torsoAngle]);
+
+      activeAngle = Math.max(leftLiftVal, rightLiftVal);
+      rangePct = Math.max(0, Math.min(100, ((Math.max(leftLift, rightLift) - (-0.1)) / (0.2 - (-0.1))) * 100));
+
+      let state = "s1";
+      if (leftLift < -0.05 && rightLift < -0.05) {
+        state = "s1";
+      } else if (leftLift >= 0.15 || rightLift >= 0.15) {
+        state = "s3";
+      } else {
+        state = "s2";
+      }
+
+      if (state === "s2") {
+        if (!stateSeq.current.includes("s2")) stateSeq.current.push("s2");
+      } else if (state === "s3") {
+        if (!stateSeq.current.includes("s3") && stateSeq.current.includes("s2")) stateSeq.current.push("s3");
+      } else if (state === "s1") {
+        if (stateSeq.current.includes("s2") && stateSeq.current.includes("s3")) {
+          if (!incorrectPosture.current) {
+            repsRef.current = repsRef.current + 1;
+            setReps(repsRef.current);
+            speak(`${repsRef.current}`);
+          } else {
+            incorrectRef.current = incorrectRef.current + 1;
+            setIncorrect(incorrectRef.current);
+            speak("Lean forward");
+          }
+        }
+        stateSeq.current = [];
+        incorrectPosture.current = false;
+      }
+
+      if (torsoAngle < 165) {
+        incorrectPosture.current = true;
+        currentFeedback = "Keep your torso upright! Don't lean back! ⚠️";
+        currentFeedbackClass = "banner-warning";
+        speak("Don't lean back");
+      }
+    }
+
+    else if (exerciseId === "burpees") {
+      const heightToWidthRatio = Math.abs(sh.y - ak.y) / (Math.abs(sh.x - ak.x) || 0.1);
+      const bodyAngle = findAngle(sh, hp, ak);
+      const handsReach = Math.round(Math.max(0, (sh.y - Math.min(leftWr.y, rightWr.y)) * 100));
+
+      setAngleReadings([
+        Math.round(heightToWidthRatio * 100),
+        bodyAngle,
+        handsReach
+      ]);
+
+      activeAngle = bodyAngle;
+      
+      const hasPlanked = stateSeq.current.includes("plank");
+      if (!hasPlanked) {
+        rangePct = Math.max(0, Math.min(100, ((1.5 - heightToWidthRatio) / (1.5 - 0.6)) * 100));
+      } else {
+        rangePct = Math.max(0, Math.min(100, ((heightToWidthRatio - 0.6) / (1.2 - 0.6)) * 100));
+      }
+
+      if (heightToWidthRatio < 0.6) {
+        if (!stateSeq.current.includes("plank")) {
+          stateSeq.current.push("plank");
+        }
+      } else if (heightToWidthRatio > 1.1 && leftWr.y < leftSh.y && rightWr.y < rightSh.y) {
+        if (stateSeq.current.includes("plank") && !stateSeq.current.includes("jump")) {
+          stateSeq.current.push("jump");
+        }
+      } else if (heightToWidthRatio > 1.1 && leftWr.y >= leftSh.y && rightWr.y >= rightSh.y) {
+        if (stateSeq.current.includes("plank") && stateSeq.current.includes("jump")) {
+          if (!incorrectPosture.current) {
+            repsRef.current = repsRef.current + 1;
+            setReps(repsRef.current);
+            speak(`${repsRef.current}`);
+          } else {
+            incorrectRef.current = incorrectRef.current + 1;
+            setIncorrect(incorrectRef.current);
+            speak("Straighten back");
+          }
+          stateSeq.current = [];
+          incorrectPosture.current = false;
+        }
+      }
+
+      if (heightToWidthRatio < 0.6 && (bodyAngle < 155 || bodyAngle > 200)) {
+        incorrectPosture.current = true;
+        currentFeedback = "Keep your body in a straight line during plank! ⚠️";
+        currentFeedbackClass = "banner-warning";
+        speak("Straighten hips");
+      }
+    }
+
+    // --- Side-View Alignment Warning (README feature corrected inversion) ---
     const nose = lm[0];
     if (nose && leftSh && rightSh) {
       const offsetAngle = findAngle(leftSh, rightSh, nose);
-      if (config.view === "side" && offsetAngle > 44) {
+      if (config.view === "side" && offsetAngle < 44) {
         currentFeedback = "Please rotate to maintain a side view! ⚠️";
         currentFeedbackClass = "banner-warning";
         speak("Align side view");
+      } else if (config.view === "frontal" && offsetAngle > 44) {
+        currentFeedback = "Please face the camera directly! Frontal view! ⚠️";
+        currentFeedbackClass = "banner-warning";
+        speak("Face the camera");
       }
     }
 
@@ -516,9 +722,13 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
     } else {
       const elapsedInactive = Date.now() - lastActiveTimestampRef.current;
       if (elapsedInactive > 10000) { // 10 seconds of inactivity
-        if (reps > 0 || incorrect > 0) {
+        if (repsRef.current > 0 || incorrectRef.current > 0 || stateSeq.current.length > 0) {
+          repsRef.current = 0;
+          incorrectRef.current = 0;
           setReps(0);
           setIncorrect(0);
+          stateSeq.current = [];
+          incorrectPosture.current = false;
           speak("Resetting reps due to inactivity");
         }
         lastActiveTimestampRef.current = Date.now(); // Reset trigger
@@ -554,6 +764,8 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
     setLoading(true);
     setSessionSaved(false);
     setSessionSummary(null);
+    repsRef.current = 0;
+    incorrectRef.current = 0;
     setReps(0);
     setIncorrect(0);
     setPostureScore(0);
@@ -640,6 +852,13 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
         cameraInstance.current = null;
       }
     }
+
+    // Clear leftover posture detection points on canvas immediately
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext("2d");
+      ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    }
+
     setActive(false);
     setFeedback("Trainer stopped. Align to camera to start again. ⚡");
     setFeedbackClass("banner-warning");
@@ -794,7 +1013,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
           <div className="grid-3" style={{ gap: "8px" }}>
             <div className="metric-box" style={{ background: "var(--card)", padding: "8px", borderRadius: "10px", border: "1px solid var(--border)", textAlign: "center" }}>
               <div style={{ fontSize: "9px", color: "var(--muted)", fontWeight: 700, letterSpacing: "0.5px" }}>REPS</div>
-              <div style={{ fontSize: "28px", fontWeight: 700, color: "#FFFFFF", marginTop: "2px" }}>{reps}</div>
+              <div style={{ fontSize: "28px", fontWeight: 700, color: "var(--text)", marginTop: "2px" }}>{reps}</div>
             </div>
             <div className="metric-box" style={{ background: "var(--card)", padding: "8px", borderRadius: "10px", border: "1px solid var(--border)", textAlign: "center" }}>
               <div style={{ fontSize: "9px", color: "var(--muted)", fontWeight: 700, letterSpacing: "0.5px" }}>POSTURE</div>
@@ -847,10 +1066,10 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
         <div className="card" style={{ marginTop: "1rem", padding: "1rem", border: "1.5px solid var(--accent)", background: "linear-gradient(135deg, rgba(99,102,241,0.06), transparent)", marginBottom: 0 }}>
           <h3 style={{ fontSize: "14px", color: "var(--accent)", marginBottom: "4px" }}>📈 Session Summary</h3>
           <p style={{ fontSize: "12px", color: "var(--muted)", lineHeight: 1.4 }}>
-            Completed: <b style={{ color: "#FFFFFF" }}>{sessionSummary.exercise.replace('_', ' ').toUpperCase()}</b> ·
-            Reps: <b style={{ color: "#FFFFFF" }}>{sessionSummary.reps_correct}</b> ·
-            Duration: <b style={{ color: "#FFFFFF" }}>{Math.floor(sessionSummary.duration_sec / 60)}m {sessionSummary.duration_sec % 60}s</b> ·
-            Accuracy: <b style={{ color: "#FFFFFF" }}>{sessionSummary.posture_score}%</b>
+            Completed: <b style={{ color: "var(--text)" }}>{sessionSummary.exercise.replace('_', ' ').toUpperCase()}</b> ·
+            Reps: <b style={{ color: "var(--text)" }}>{sessionSummary.reps_correct}</b> ·
+            Duration: <b style={{ color: "var(--text)" }}>{Math.floor(sessionSummary.duration_sec / 60)}m {sessionSummary.duration_sec % 60}s</b> ·
+            Accuracy: <b style={{ color: "var(--text)" }}>{sessionSummary.posture_score}%</b>
           </p>
           <div style={{ marginTop: "4px", fontSize: "14px" }}>
             {"⭐".repeat(sessionSummary.stars)}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "./components/Sidebar";
 import Home from "./pages/Home";
 import AITrainer from "./pages/AITrainer";
@@ -14,7 +14,7 @@ import "./App.css";
 export default function App() {
   const [user, setUser] = useState(() => {
     try {
-      const saved = localStorage.getItem("lemonade_user");
+      const saved = localStorage.getItem("kineticlens_user");
       return saved ? JSON.parse(saved) : null;
     } catch (e) {
       return null;
@@ -23,6 +23,18 @@ export default function App() {
 
   const [activeTab, setActiveTab] = useState("home");
   const [selectedExercise, setSelectedExercise] = useState("bicep_curl");
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem("kineticlens_theme") || "dark";
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("kineticlens_theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  };
 
   const handleLogin = (profile) => {
     setUser(profile);
@@ -30,7 +42,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("lemonade_user");
+    localStorage.removeItem("kineticlens_user");
     setUser(null);
     if (window.speechSynthesis) {
       window.speechSynthesis.cancel();
@@ -50,6 +62,8 @@ export default function App() {
           <Home
             setActiveTab={setActiveTab}
             setSelectedExercise={setSelectedExercise}
+            theme={theme}
+            user={user}
           />
         );
       case "trainer":
@@ -57,6 +71,7 @@ export default function App() {
           <AITrainer
             selectedExercise={selectedExercise}
             setSelectedExercise={setSelectedExercise}
+            theme={theme}
           />
         );
       case "planner":
@@ -68,7 +83,7 @@ export default function App() {
       case "recovery":
         return <Recovery />;
       case "tracker":
-        return <BodyTracker />;
+        return <BodyTracker theme={theme} />;
       case "achievements":
         return <Achievements />;
       default:
@@ -76,6 +91,8 @@ export default function App() {
           <Home
             setActiveTab={setActiveTab}
             setSelectedExercise={setSelectedExercise}
+            theme={theme}
+            user={user}
           />
         );
     }
@@ -83,7 +100,14 @@ export default function App() {
 
   return (
     <div className="app-container">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} user={user} onLogout={handleLogout} />
+      <Sidebar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        user={user}
+        onLogout={handleLogout}
+        theme={theme}
+        toggleTheme={toggleTheme}
+      />
       <main className="main-content">{renderContent()}</main>
     </div>
   );

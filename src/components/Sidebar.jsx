@@ -11,27 +11,40 @@ const navLinks = [
   { id: "achievements", label: "Achievements", icon: "🏆" }
 ];
 
-export default function Sidebar({ activeTab, setActiveTab, user, onLogout }) {
+export default function Sidebar({ activeTab, setActiveTab, user, onLogout, theme, toggleTheme }) {
   return (
     <aside style={styles.sidebar}>
       <div style={styles.logoContainer}>
-        <span style={styles.logoEmoji}>🍋</span>
-        <h2 style={styles.logoText}>
-          <span style={{ color: "#6366F1" }}>LEMON</span>
-          <span style={{ color: "#06B6D4" }}>ADE</span>
-        </h2>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1 }}>
+          <span style={styles.logoEmoji}>⚡</span>
+          <h2 style={styles.logoText}>
+            <span style={{ color: "var(--accent)" }}>KINETIC</span>
+            <span style={{ color: "var(--accent-light)" }}>LENS</span>
+          </h2>
+        </div>
+        <button
+          onClick={toggleTheme}
+          style={styles.themeToggleBtn}
+          title={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
+        >
+          {theme === "light" ? "🌙" : "☀️"}
+        </button>
       </div>
 
       <nav style={styles.nav}>
         {navLinks.map((link) => {
           const isActive = activeTab === link.id;
+          const linkColor = "#9CA3AF"; // High-contrast light grey on dark sidebar
+          const activeBg = "rgba(129, 140, 248, 0.12)"; // Soft indigo active highlight
+          const activeColor = "var(--accent)";
           return (
             <button
               key={link.id}
               onClick={() => setActiveTab(link.id)}
               style={{
                 ...styles.navLink,
-                ...(isActive ? styles.navLinkActive : {})
+                color: isActive ? activeColor : linkColor,
+                backgroundColor: isActive ? activeBg : "transparent"
               }}
             >
               <span style={styles.icon}>{link.icon}</span>
@@ -115,8 +128,8 @@ const styles = {
     fontFamily: "'Inter', sans-serif"
   },
   navLinkActive: {
-    backgroundColor: "rgba(99, 102, 241, 0.15)",
-    color: "#FFFFFF"
+    backgroundColor: "rgba(129, 140, 248, 0.12)",
+    color: "var(--accent)"
   },
   icon: {
     marginRight: "12px",
@@ -193,5 +206,18 @@ const styles = {
     transition: "all 0.2s ease",
     marginTop: "4px",
     fontFamily: "'Outfit', sans-serif"
+  },
+  themeToggleBtn: {
+    background: "transparent",
+    border: "none",
+    fontSize: "18px",
+    cursor: "pointer",
+    padding: "6px",
+    borderRadius: "50%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "all 0.2s ease",
+    outline: "none"
   }
 };
