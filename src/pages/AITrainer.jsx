@@ -160,6 +160,13 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
   const lastActiveTimestampRef = useRef(Date.now());
   const animationFrameId = useRef(null);
 
+  const formErrorsRef = useRef({});
+  const consecutiveIncorrectRef = useRef(0);
+
+  const recordError = (type) => {
+    formErrorsRef.current[type] = (formErrorsRef.current[type] || 0) + 1;
+  };
+
   useEffect(() => {
     if (selectedExercise) {
       setExerciseId(selectedExercise);
@@ -329,6 +336,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
         currentFeedback = "Pin your elbows to your sides! ⚠️";
         currentFeedbackClass = "banner-warning";
         speak("Pin elbows");
+        recordError("elbow_flare");
       }
     } 
     
@@ -375,6 +383,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
         currentFeedback = "Keep your chest up and back straight! ⚠️";
         currentFeedbackClass = "banner-warning";
         speak("Keep chest up");
+        recordError("forward_lean");
       }
     } 
     
@@ -421,6 +430,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
         currentFeedback = "Keep your body in a straight line! ⚠️";
         currentFeedbackClass = "banner-warning";
         speak("Straighten hips");
+        recordError("hip_sag");
       }
     } 
     
@@ -458,6 +468,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
         incorrectPosture.current = true;
         currentFeedback = "Keep your elbow high! Upper arm horizontal! ⚠️";
         currentFeedbackClass = "banner-warning";
+        recordError("elbow_drop");
       }
     } 
     
@@ -495,6 +506,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
         incorrectPosture.current = true;
         currentFeedback = "Keep a slight bend in your elbows! Do not lock! ⚠️";
         currentFeedbackClass = "banner-warning";
+        recordError("locked_elbows");
       }
     }
 
@@ -533,6 +545,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
         currentFeedback = "Keep your torso upright! Don't lean forward! ⚠️";
         currentFeedbackClass = "banner-warning";
         speak("Keep torso upright");
+        recordError("forward_lean");
       }
     }
 
@@ -570,6 +583,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
         incorrectPosture.current = true;
         currentFeedback = "Keep your elbows flared out at 90 degrees! ⚠️";
         currentFeedbackClass = "banner-warning";
+        recordError("elbows_inward");
       }
     }
 
@@ -624,6 +638,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
         incorrectPosture.current = true;
         currentFeedback = "Raise both arms symmetrically overhead! ⚠️";
         currentFeedbackClass = "banner-warning";
+        recordError("arm_asymmetry");
       }
     }
 
@@ -678,6 +693,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
         currentFeedback = "Keep your torso upright! Don't lean back! ⚠️";
         currentFeedbackClass = "banner-warning";
         speak("Don't lean back");
+        recordError("leaning_back");
       }
     }
 
@@ -730,6 +746,7 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
         currentFeedback = "Keep your body in a straight line during plank! ⚠️";
         currentFeedbackClass = "banner-warning";
         speak("Straighten hips");
+        recordError("hip_sag");
       }
     }
 
@@ -807,6 +824,8 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
     startTime.current = Date.now();
     lastActiveTimestampRef.current = Date.now();
     activeRef.current = true;
+    formErrorsRef.current = {};
+    consecutiveIncorrectRef.current = 0;
 
     try {
       if (!poseInstance.current) {
@@ -906,18 +925,61 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
     }
   }, [reps, incorrect]);
 
+  useEffect(() => {
+    if (reps > 0) {
+      consecutiveIncorrectRef.current = 0;
+    }
+  }, [reps]);
+
+  useEffect(() => {
+    if (incorrect > 0) {
+      consecutiveIncorrectRef.current += 1;
+      if (consecutiveIncorrectRef.current === 3) {
+        speak("Fatigue detected. Take a short rest or focus on form.");
+        setFeedback("AI Alert: Fatigue detected! Consider taking a short rest. 🧘");
+        setFeedbackClass("banner-warning");
+      }
+    }
+  }, [incorrect]);
+
   const handleEndSession = () => {
     if (!startTime.current) return;
     
     stopCamera();
     const duration = Math.round((Date.now() - startTime.current) / 1000);
-    const summary = saveSession(exerciseId, reps, incorrect, postureScore, duration);
+    
+    // Determine primary error from breakdown
+    const errors = formErrorsRef.current;
+    let primaryError = "";
+    let maxCount = 0;
+    Object.keys(errors).forEach(key => {
+      if (errors[key] > maxCount) {
+        maxCount = errors[key];
+        primaryError = key;
+      }
+    });
+
+    const adviceMap = {
+      elbow_flare: "Focus on keeping your elbows pinned close to your sides.",
+      forward_lean: "Keep your chest lifted and avoid leaning your torso too far forward.",
+      hip_sag: "Keep your core engaged to prevent your hips from sagging or arching.",
+      locked_elbows: "Avoid locking your joints at the end of the range. Keep a slight bend.",
+      elbow_drop: "Keep your upper arms horizontal and elbows high.",
+      elbows_inward: "Keep your elbows flared out at 90 degrees.",
+      arm_asymmetry: "Focus on raising both arms symmetrically overhead.",
+      leaning_back: "Keep your torso upright and avoid leaning backwards."
+    };
+
+    const coachingTip = adviceMap[primaryError] || "Exceptional posture! Flawless movement execution.";
+
+    const summary = saveSession(exerciseId, reps, incorrect, postureScore, duration, errors);
     
     const stars = Math.min(5, Math.max(1, Math.round(postureScore / 20)));
     setSessionSummary({
       ...summary,
       duration,
-      stars
+      stars,
+      coachingTip
     });
     setSessionSaved(true);
     speak("Session saved successfully");
@@ -1289,8 +1351,15 @@ export default function AITrainer({ selectedExercise, setSelectedExercise }) {
             Duration: <b style={{ color: "var(--text)" }}>{Math.floor(sessionSummary.duration_sec / 60)}m {sessionSummary.duration_sec % 60}s</b> ·
             Accuracy: <b style={{ color: "var(--text)" }}>{sessionSummary.posture_score}%</b>
           </p>
-          <div style={{ marginTop: "4px", fontSize: "14px" }}>
-            {"⭐".repeat(sessionSummary.stars)}
+          <div style={{ marginTop: "4px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
+            <div style={{ fontSize: "14px" }}>
+              {"⭐".repeat(sessionSummary.stars)}
+            </div>
+            {sessionSummary.coachingTip && (
+              <div style={{ fontSize: "11px", color: "var(--accent-light)", fontStyle: "italic", fontWeight: "555" }}>
+                💡 AI Coaching Tip: {sessionSummary.coachingTip}
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -17,10 +17,22 @@ The project aims to revolutionize fitness guidance by leveraging cutting-edge te
 Our AI-powered fitness application follows a structured approach to posture detection, personalized workout recommendations, and real-time feedback. The methodology consists of three core components:
 
 ### A. POSTURE CORRECTION FUNCTION
-In this web application, we have integrated five primary exercises, namely Squats, Bicep Curl, Dumbbell Fly, Dumbbell kickback, and Push-ups, to cater to diverse fitness routines. Each 
-exercise uses the same standardized logic, meticulously designed to ensure accuracy and
-effectiveness. For an easier explanation of this approach, we will employ the Bicep Curl as a
-paradigmatic example for elucidation within this report. 
+In this web application, we have integrated **ten diverse exercises** (strength and cardio workouts) to cater to full-body fitness routines. Each exercise employs client-side computer vision logic to track posture, count correct repetitions, verify user view alignment, and flag incorrect form in real-time.
+
+| Exercise Name | Target Muscle / Group | Camera View | Biomechanical Rules & Feedback Checks |
+| :--- | :--- | :--- | :--- |
+| **Bicep Curl** | Arms (Biceps) | Side View | Tracks elbow flexion (140° down to 85°). Triggers warning `"Pin elbows"` if the upper arm pivots too far from the torso (>22°). |
+| **Squats** | Legs (Quads & Glutes) | Side View | Tracks knee bend (150° down to 105°). Triggers warning `"Keep chest up"` if hip alignment drops forward too low (<80°). |
+| **Push-ups** | Chest & Arms | Side View | Tracks elbow flexion (145° down to 95°). Triggers warning `"Straighten hips"` if body line curves or sags (<155° or >200°). |
+| **Dumbbell Fly** | Chest (Pectorals) | Frontal View | Tracks arm lift angle (35° up to 80°). Triggers warning `"Do not lock"` if elbow extension is too straight (>170°). |
+| **Tricep Kickback** | Arms (Triceps) | Side View | Tracks elbow extension (95° up to 140°). Triggers warning `"Keep elbow high"` if the upper arm drops vertical (<75°). |
+| **Lunges** | Legs (Quads & Glutes) | Side View | Tracks front knee bend (150° down to 95°). Triggers warning `"Keep torso upright"` if the back leans forward (<70°). |
+| **Shoulder Press** | Shoulders (Deltoids) | Frontal View | Tracks elbow extension (100° up to 150°). Triggers warning `"Keep elbows flared"` if arms collapse inward (<60°). |
+| **Jumping Jacks** | Cardio & Full Body | Frontal View | Tracks arm lift angle (35° to 125°) and leg separation ratio. Triggers warning `"Raise arms symmetrically"` if arms differ by >30°. |
+| **High Knees** | Cardio & Legs | Side View | Tracks knee lift height relative to torso length. Triggers warning `"Don't lean back"` if spine/torso angle falls below 165°. |
+| **Burpees** | Full Body & Cardio | Side View | Tracks height-to-width ratio to detect transition from squat, to plank (ratio <0.6), to jump (>1.1). Warnings trigger on plank body sagging. |
+
+For an easier explanation of this approach, we will employ the Bicep Curl as a paradigmatic example for elucidation within this report. 
 
 #### 1. **Real-Time Posture Detection**
 - MediaPipe Pose employs machine learning for precise body pose tracking in videos. It uses BlazePose, integrating COCO, BlazeFace, and BlazePalm functionalities, to detect 33 body landmarks in an RGB frame. The system follows a two-stage detection-tracking pipeline: first, it detects the region of interest (ROI) to locate the person, and then, it tracks and predicts pose landmarks within the ROI using a cropped frame.

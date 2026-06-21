@@ -3,25 +3,40 @@
  * Persists sessions, calendar entries, body metrics, and achievements.
  */
 
-// Helper to get items
+const getActiveUsername = () => {
+  try {
+    const userStr = localStorage.getItem("kineticlens_user");
+    if (userStr) {
+      const user = JSON.parse(userStr);
+      return user.username || "guest";
+    }
+  } catch (e) {}
+  return "guest";
+};
+
+// Helper to get items, prefixed by active user
 const get = (key, defaultVal) => {
   try {
-    const data = localStorage.getItem(key);
+    const username = getActiveUsername();
+    const prefixedKey = `${username}_${key}`;
+    const data = localStorage.getItem(prefixedKey);
     return data ? JSON.parse(data) : defaultVal;
   } catch (e) {
     return defaultVal;
   }
 };
 
-// Helper to set items
+// Helper to set items, prefixed by active user
 const set = (key, val) => {
   try {
-    localStorage.setItem(key, JSON.stringify(val));
+    const username = getActiveUsername();
+    const prefixedKey = `${username}_${key}`;
+    localStorage.setItem(prefixedKey, JSON.stringify(val));
   } catch (e) {}
 };
 
 // Save a completed workout session
-export const saveSession = (exercise, repsCorrect, repsIncorrect, postureScore = null, durationSec = 0) => {
+export const saveSession = (exercise, repsCorrect, repsIncorrect, postureScore = null, durationSec = 0, errorBreakdown = {}) => {
   const sessions = get("workout_sessions", []);
   
   let finalScore = postureScore;
@@ -39,6 +54,7 @@ export const saveSession = (exercise, repsCorrect, repsIncorrect, postureScore =
     reps_incorrect: Number(repsIncorrect),
     posture_score: Number(finalScore),
     duration_sec: Number(durationSec),
+    error_breakdown: errorBreakdown,
     created_at: new Date().toISOString()
   };
 
